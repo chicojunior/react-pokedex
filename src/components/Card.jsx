@@ -1,18 +1,37 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-import useFetch from '../hooks/useFetch';
+import axios from 'axios';
 
 const Card = (props) => {
-  const data = useFetch(props.pokemon.url);
-  const pokemon = data.response;
+  const [pokemon, setPokemon] = useState({});
+  const [abilities, setAbilities] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await axios.get(props.pokemon.url);
+      setPokemon(response.data);
+      if (response.data) {
+        response.data.abilities.forEach(async (item) => {
+          const response = await axios.get(item.ability.url);
+          setAbilities([...abilities, response.data]);
+        });
+      }
+    };
+    fetchData();
+  }, []);
 
   return pokemon ? (
     <div>
       <img
         src={`https://pokeres.bastionbot.org/images/pokemon/${pokemon.id}.png`}
-        alt={`${pokemon.name} image`}
+        alt={`${pokemon.name}`}
       />
       <p>Name: {pokemon.name}</p>
+      <div>
+        {abilities.length
+          ? abilities.map((ability) => <p key={ability.id}>{ability.name}</p>)
+          : null}
+      </div>
     </div>
   ) : null;
 };
