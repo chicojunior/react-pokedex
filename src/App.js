@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { Component } from 'react';
 
 import axios from 'axios';
 
@@ -6,24 +6,28 @@ import './App.css';
 
 import List from './components/List';
 
-function App() {
-  const [pokemonList, setPokemonList] = useState([]);
+class App extends Component {
+  state = {
+    allPokemons: [],
+  };
 
-  useEffect(() => {
+  componentDidMount() {
     const fetchData = async () => {
       const response = await axios.get(
         'https://pokeapi.co/api/v2/pokemon?limit=151'
       );
-      setPokemonList(response.data.results);
+      this.setState({ allPokemons: response.data.results });
     };
     fetchData();
-  }, []);
+  }
 
-  return pokemonList ? (
-    <div>
-      <List list={pokemonList} />
-    </div>
-  ) : null;
+  render() {
+    return this.state.allPokemons ? (
+      <div>
+        <List allPokemons={this.state.allPokemons} />
+      </div>
+    ) : null;
+  }
 }
 
 export default App;

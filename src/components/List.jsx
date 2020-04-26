@@ -1,52 +1,63 @@
-import React, { useEffect, useState } from 'react';
+import React, { Component } from 'react';
 
 import axios from 'axios';
 
 import Card from './Card';
 
-const List = (props) => {
-  // const [pokemon, setPokemon] = useState({});
-  // const [pokemonList, setPokemonList] = useState([]);
-  // const [abilities, setAbilities] = useState([]);
+class List extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      pokemon: {},
+      pokemonList: [],
+    };
+  }
 
-  let pok = {};
+  componentDidMount() {
+    this.setState({ pokemonList: this.props.allPokemons });
+  }
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (props.list.length) {
-        props.list.forEach(async (item) => {
-          const response = await axios.get(item.url);
-          const data = response.data;
-          console.log(data);
-          if (data) {
-            pok.id = data.id;
-            pok.name = data.name;
-            pok.image = `https://pokeres.bastionbot.org/images/pokemon/${data.id}.png`;
-          }
+  componentDidUpdate(prevProps) {
+    if (this.props.allPokemons.length !== prevProps) {
+      this.getPokemonDetails();
+    }
+  }
+
+  getPokemonDetails = () => {
+    let pok = {};
+    const request = this.props.allPokemons.map((pokemon) =>
+      axios.get(pokemon.url)
+    );
+    axios.all(request).then((pokemons) =>
+      pokemons.map((pokemon) => {
+        const { name, url, abilities } = pokemon.data;
+
+        this.setState({
+          pokemon: pokemon.data,
+          pokemonList: [...this.state.pokemonList, { name, url, abilities }],
         });
 
-        console.log(pok);
-      }
+        this.getAbilities();
+      })
+    );
+  };
 
-      // const response = await axios.get(props.pokemon.url);
-      // setPokemon(response.data);
-      // if (response.data) {
-      //   response.data.abilities.forEach(async (item) => {
-      //     const response = await axios.get(item.ability.url);
-      //     setAbilities([...abilities, response.data]);
-      //   });
-      // }
-    };
-    fetchData();
-  });
+  getAbilities = () => {
+    // const req = this.state.pokemon.abilities.map(
+    //   async (ability) => await axios.get(ability.url)
+    // );
+    // console.log(req.data);
+  };
 
-  return props.list.length ? (
-    <div>
-      {props.list.map((pokemon) => (
-        <Card key={pokemon.name} pokemon={pokemon} />
-      ))}
-    </div>
-  ) : null;
-};
+  render() {
+    return this.props.allPokemons.length ? (
+      <div>
+        {this.props.allPokemons.map((pokemon) => (
+          <Card key={pokemon.name} pokemon={pokemon} />
+        ))}
+      </div>
+    ) : null;
+  }
+}
 
 export default List;
