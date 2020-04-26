@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React from 'react';
 
 import './App.css';
 
-import List from './components/List';
 import useFetch from './hooks/useFetch';
+
+import List from './components/List';
 
 function App() {
   const data = useFetch('https://pokeapi.co/api/v2/pokemon?limit=151');
